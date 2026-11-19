@@ -61,5 +61,38 @@ Pipeline-Pilot/
 ## Development Status
 Project structure and initial documentation are being organized. Implementation will follow the planned development sequence.
 
+## Requirements & Development Planning
+
+PipelinePilot follows a structured development approach to ensure that requirements, features, modules and implementation tasks are clearly defined before development.
+
+### Project Documentation
+
+The `docs/` directory contains the project planning and technical documentation.
+
+| Document | Description |
+|---|---|
+| `architecture.md` | Proposed system architecture and workflow |
+| `project-modules.md` | Overview of the main project modules |
+| `requirements.md` | Functional, non-functional and user requirements |
+| `feature-breakdown.md` | Feature descriptions, inputs, processing and outputs |
+| `module-breakdown.md` | Module responsibilities, dependencies and communication |
+| `feature-prioritization.md` | Feature classification based on implementation priority |
+| `development-task-list.md` | Step-by-step development roadmap |
+
+### Development Strategy
+
+Development will follow a priority-based approach:
+
+1. Establish the application foundation.
+2. Implement the CI/CD pipeline and automated testing.
+3. Containerize the application using Docker.
+4. Provision cloud infrastructure using Terraform.
+5. Deploy the application to AWS EC2.
+6. Integrate monitoring using Prometheus and Grafana.
+7. Implement failure handling and recovery.
+8. Develop and integrate the deployment dashboard.
+
+The core deployment workflow will be implemented and validated before proceeding with additional enhancements.
+
 ## Author
 Moulika R
