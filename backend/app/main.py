@@ -7,11 +7,13 @@ from backend.app.services.validation_history import (
     save_validation_report,
     get_validation_history,
 )
+from backend.app.services.validation_analytics import get_validation_summary
+
 
 app = FastAPI(
     title="PipelinePilot",
     description="Cloud-Native CI/CD and Deployment Automation Platform",
-    version="0.3.0"
+    version="0.4.0"
 )
 
 
@@ -39,8 +41,6 @@ def health_check():
 @app.post("/validate")
 def validate_project_endpoint(request: ValidationRequest):
     report = validate_project(request.project_path)
-
-    # Automatically save each validation report
     saved_report = save_validation_report(report)
 
     return {
@@ -57,6 +57,12 @@ def history_endpoint():
         "total_reports": len(history),
         "history": history
     }
+
+
+# Keep this route BEFORE /history/{report_id}
+@app.get("/history/summary")
+def validation_summary_endpoint():
+    return get_validation_summary()
 
 
 @app.get("/history/{report_id}")

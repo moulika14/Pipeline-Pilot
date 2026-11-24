@@ -3,7 +3,7 @@
 
 Pipeline-Pilot is a DevOps automation project designed to simplify project validation and support a structured CI/CD workflow. It aims to automate build verification, testing, containerization, deployment, infrastructure provisioning, and monitoring.
 
-The project currently includes a Python-based project validation system with automated readiness checks and persistent validation history through REST API endpoints.
+The project currently includes a Python-based project validation system with automated readiness checks, persistent validation history, and validation analytics through REST API endpoints.
 
 ---
 
@@ -64,7 +64,43 @@ The validation system is integrated with FastAPI, enabling users to validate pro
 | `/health` | GET | Checks backend health |
 | `/validate` | POST | Validates a project and saves the report |
 | `/history` | GET | Retrieves all saved validation reports |
+| `/history/summary` | GET | Retrieves validation analytics and summary |
 | `/history/{report_id}` | GET | Retrieves a specific report by ID |
+
+### 4. Validation Analytics & Summary
+
+A new analytics feature generates insights from previously stored validation reports.
+
+**Key capabilities:**
+- Calculates total validations performed.
+- Counts successful validations.
+- Counts failed validations.
+- Calculates the overall success percentage.
+- Retrieves the latest validation report.
+
+**Analytics endpoint:**
+
+`GET /history/summary`
+
+**Sample response:**
+
+```json
+{
+  "total_validations": 8,
+  "successful_validations": 4,
+  "failed_validations": 4,
+  "success_rate": 50,
+  "latest_validation": {
+    "report": {
+      "status": "PASS",
+      "score": "6/6",
+      "percentage": 100
+    }
+  }
+}
+```
+
+The summary is calculated dynamically using the stored validation history.
 
 ---
 
@@ -98,7 +134,8 @@ Pipeline-Pilot/
 │       ├── main.py
 │       ├── services/
 │       │   ├── project_validator.py
-│       │   └── validation_history.py
+│       │   ├── validation_history.py
+│       │   └── validation_analytics.py
 │       └── data/
 │           └── validation_history.json
 ├── docker/
@@ -122,7 +159,7 @@ Pipeline-Pilot/
 
 ## API Usage
 
-### Validate a Project
+### 1. Validate a Project
 
 **Endpoint:** `POST /validate`
 
@@ -134,19 +171,30 @@ Request:
 }
 ```
 
-The API checks the project structure and returns a validation report. Successful validation reports are automatically saved to the history system.
+The API checks the project structure and returns a validation report. The report is automatically saved to the history system.
 
-### Retrieve Validation History
+### 2. Retrieve Validation History
 
 **Endpoint:** `GET /history`
 
 Returns the total number of stored reports and the validation records in newest-first order.
 
-### Retrieve a Specific Report
+### 3. Retrieve a Specific Report
 
 **Endpoint:** `GET /history/{report_id}`
 
 Returns an individual report using its unique ID.
+
+### 4. Retrieve Validation Analytics
+
+**Endpoint:** `GET /history/summary`
+
+Returns:
+- Total validations
+- Successful validations
+- Failed validations
+- Success rate
+- Latest validation report
 
 ---
 
@@ -183,7 +231,7 @@ pip install -r requirements.txt
 py -m uvicorn backend.app.main:app --reload
 ```
 
-### 6. Access the API documentation
+### 6. Access API documentation
 
 Open:
 
@@ -203,12 +251,14 @@ Run the tests:
 py -m pytest -v
 ```
 
-**Current test results:**
+**Latest verified test results:**
 - Valid project validation — Passed
 - Missing requirements detection — Passed
 - Invalid project path validation — Passed
 
-**Latest verified result: 3 tests passed.**
+**Latest verified result: 3 tests passed in 0.12 seconds.**
+
+The validation analytics endpoint was also manually tested through Swagger and returned HTTP 200 with the expected summary metrics.
 
 ---
 
@@ -233,12 +283,13 @@ The project follows a phased development approach:
 1. Project foundation and structure
 2. Project validation and automated testing
 3. Validation history and API integration
-4. CI/CD pipeline enhancements
-5. Docker containerization
-6. Infrastructure provisioning
-7. Cloud deployment
-8. Monitoring and visualization
-9. Failure handling and recovery
+4. Validation analytics and summary
+5. CI/CD pipeline enhancements
+6. Docker containerization
+7. Infrastructure provisioning
+8. Cloud deployment
+9. Monitoring and visualization
+10. Failure handling and recovery
 
 ---
 
