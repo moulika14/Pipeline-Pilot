@@ -3,7 +3,7 @@
 
 Pipeline-Pilot is a DevOps automation project designed to simplify project validation and support a structured CI/CD workflow. It aims to automate build verification, testing, containerization, deployment, infrastructure provisioning, and monitoring.
 
-The project currently includes a Python-based project validation system with automated readiness checks, persistent validation history, and validation analytics through REST API endpoints.
+The project currently includes a Python-based project validation system with automated readiness checks, SQLite-backed validation history, CRUD operations, and validation analytics through REST API endpoints.
 
 ---
 
@@ -43,33 +43,53 @@ The validator checks whether a project meets essential requirements before pipel
 - Project path
 - Status message
 
-### 2. Validation History
+### 2. SQLite Database Integration
 
-The system stores validation reports locally in JSON format.
+Pipeline-Pilot uses SQLite for persistent storage of project validation history.
 
-Each record contains:
-- Unique report ID
-- Timestamp
-- Validation result
-- Project readiness score
-- Missing requirements
+**Database details:**
+- Database: SQLite
+- ORM: SQLAlchemy
+- Database file: `backend/app/data/pipeline_pilot.db`
+- Table: `validation_records`
 
-### 3. REST API Integration
+**Table fields:**
 
-The validation system is integrated with FastAPI, enabling users to validate projects and retrieve saved reports through API endpoints.
+| Column | Data Type | Description |
+|---|---|---|
+| id | VARCHAR | Unique validation record ID (Primary Key) |
+| timestamp | VARCHAR | Validation date and time |
+| report | JSON | Complete validation report |
+
+The existing JSON validation history was migrated into SQLite. The original JSON file is preserved as a backup.
+
+### 3. Validation History and CRUD Operations
+
+The application supports all four database operations:
+
+- **Create:** Save new validation reports.
+- **Read:** Retrieve all reports or a specific report.
+- **Update:** Modify an existing validation report.
+- **Delete:** Remove a selected validation record.
+
+### 4. REST API Integration
+
+The validation system is integrated with FastAPI.
 
 | Endpoint | Method | Description |
 |---|---|---|
 | `/` | GET | Displays API service status |
 | `/health` | GET | Checks backend health |
 | `/validate` | POST | Validates a project and saves the report |
-| `/history` | GET | Retrieves all saved validation reports |
-| `/history/summary` | GET | Retrieves validation analytics and summary |
-| `/history/{report_id}` | GET | Retrieves a specific report by ID |
+| `/history` | GET | Retrieves all validation reports |
+| `/history/summary` | GET | Retrieves validation analytics |
+| `/history/{report_id}` | GET | Retrieves a specific report |
+| `/history/{report_id}` | PUT | Updates a validation report |
+| `/history/{report_id}` | DELETE | Deletes a validation report |
 
-### 4. Validation Analytics & Summary
+### 5. Validation Analytics and Summary
 
-A new analytics feature generates insights from previously stored validation reports.
+The analytics feature generates insights from previously stored validation reports.
 
 **Key capabilities:**
 - Calculates total validations performed.
@@ -82,24 +102,6 @@ A new analytics feature generates insights from previously stored validation rep
 
 `GET /history/summary`
 
-**Sample response:**
-
-```json
-{
-  "total_validations": 8,
-  "successful_validations": 4,
-  "failed_validations": 4,
-  "success_rate": 50,
-  "latest_validation": {
-    "report": {
-      "status": "PASS",
-      "score": "6/6",
-      "percentage": 100
-    }
-  }
-}
-```
-
 The summary is calculated dynamically using the stored validation history.
 
 ---
@@ -110,6 +112,8 @@ The summary is calculated dynamically using the stored validation history.
 |---|---|
 | Python | Backend development |
 | FastAPI | REST API framework |
+| SQLite | Database management |
+| SQLAlchemy | Object Relational Mapper (ORM) |
 | Pytest | Automated testing |
 | Git | Version control |
 | GitHub | Source code hosting |
@@ -132,14 +136,19 @@ Pipeline-Pilot/
 ├── backend/
 │   └── app/
 │       ├── main.py
+│       ├── database/
+│       │   ├── __init__.py
+│       │   ├── connection.py
+│       │   └── models.py
 │       ├── services/
 │       │   ├── project_validator.py
 │       │   ├── validation_history.py
 │       │   └── validation_analytics.py
 │       └── data/
 │           └── validation_history.json
-├── docker/
 ├── docs/
+│   └── database-schema.md
+├── docker/
 ├── frontend/
 ├── monitoring/
 │   ├── grafana/
@@ -153,7 +162,7 @@ Pipeline-Pilot/
 └── requirements.txt
 ```
 
-*Note: The validation history JSON file is generated locally at runtime and is excluded from version control.*
+*Note: The SQLite database file and local validation history data are excluded from version control.*
 
 ---
 
@@ -171,13 +180,13 @@ Request:
 }
 ```
 
-The API checks the project structure and returns a validation report. The report is automatically saved to the history system.
+The API checks the project structure and saves the resulting validation report to SQLite.
 
 ### 2. Retrieve Validation History
 
 **Endpoint:** `GET /history`
 
-Returns the total number of stored reports and the validation records in newest-first order.
+Returns all stored validation reports in newest-first order.
 
 ### 3. Retrieve a Specific Report
 
@@ -185,16 +194,23 @@ Returns the total number of stored reports and the validation records in newest-
 
 Returns an individual report using its unique ID.
 
-### 4. Retrieve Validation Analytics
+### 4. Update a Validation Report
+
+**Endpoint:** `PUT /history/{report_id}`
+
+Updates the report associated with the specified ID.
+
+### 5. Delete a Validation Report
+
+**Endpoint:** `DELETE /history/{report_id}`
+
+Deletes the selected validation record.
+
+### 6. Retrieve Validation Analytics
 
 **Endpoint:** `GET /history/summary`
 
-Returns:
-- Total validations
-- Successful validations
-- Failed validations
-- Success rate
-- Latest validation report
+Returns total validations, successful validations, failed validations, success rate, and the latest validation report.
 
 ---
 
@@ -241,6 +257,14 @@ Interactive Swagger documentation is available for testing the API endpoints.
 
 ---
 
+## Database Documentation
+
+The database schema, table structure, column definitions, and entity relationship diagram are documented here:
+
+- [Database Schema Documentation](docs/database-schema.md)
+
+---
+
 ## Testing
 
 Automated tests are implemented using Pytest.
@@ -251,14 +275,12 @@ Run the tests:
 py -m pytest -v
 ```
 
-**Latest verified test results:**
-- Valid project validation — Passed
-- Missing requirements detection — Passed
-- Invalid project path validation — Passed
+Previously verified test cases:
+- Valid project validation
+- Missing requirements detection
+- Invalid project path validation
 
-**Latest verified result: 3 tests passed in 0.12 seconds.**
-
-The validation analytics endpoint was also manually tested through Swagger and returned HTTP 200 with the expected summary metrics.
+The database integration and CRUD endpoints have also been manually tested through FastAPI Swagger documentation.
 
 ---
 
@@ -278,18 +300,17 @@ The following modules represent the project's planned development scope and are 
 
 ## Development Roadmap
 
-The project follows a phased development approach:
-
 1. Project foundation and structure
 2. Project validation and automated testing
 3. Validation history and API integration
 4. Validation analytics and summary
-5. CI/CD pipeline enhancements
-6. Docker containerization
-7. Infrastructure provisioning
-8. Cloud deployment
-9. Monitoring and visualization
-10. Failure handling and recovery
+5. SQLite database integration and CRUD operations
+6. CI/CD pipeline enhancements
+7. Docker containerization
+8. Infrastructure provisioning
+9. Cloud deployment
+10. Monitoring and visualization
+11. Failure handling and recovery
 
 ---
 
@@ -304,6 +325,7 @@ Detailed project documentation is available in the `docs/` directory.
 - [Module Breakdown](docs/module-breakdown.md)
 - [Feature Prioritization](docs/feature-prioritization.md)
 - [Development Task List](docs/development-task-list.md)
+- [Database Schema](docs/database-schema.md)
 
 ---
 
@@ -311,4 +333,4 @@ Detailed project documentation is available in the `docs/` directory.
 
 **Moulika R**
 
-GitHub: [moulika14](https://github.com/moulika14)
+GitHub: (https://github.com/moulika14)

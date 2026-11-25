@@ -18,3 +18,8 @@ Thumbs.db
 
 # Generated validation history
 backend/app/data/
+
+# SQLite database files
+*.db
+*.sqlite
+*.sqlite3
