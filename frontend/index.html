@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pipeline-Pilot | Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <aside class="sidebar">
+        <h2>⚡ Pipeline-Pilot</h2>
+        <p class="subtitle">CI/CD Automation Platform</p>
+        <nav>
+            <a href="#dashboard">Dashboard</a>
+            <a href="#validator">Project Validator</a>
+            <a href="#history">Validation History</a>
+        </nav>
+        <div class="sidebar-footer">UNAI TECH Internship 2026</div>
+    </aside>
+
+    <main class="main-content">
+        <header>
+            <div>
+                <h1>Pipeline Dashboard</h1>
+                <p>Monitor and validate your project readiness.</p>
+            </div>
+            <span id="apiStatus" class="status">Checking API...</span>
+        </header>
+
+        <section id="dashboard" class="stats">
+            <div class="stat-card">
+                <p>Total Validations</p>
+                <h2 id="total">--</h2>
+            </div>
+            <div class="stat-card">
+                <p>Successful</p>
+                <h2 id="successful">--</h2>
+            </div>
+            <div class="stat-card">
+                <p>Failed</p>
+                <h2 id="failed">--</h2>
+            </div>
+            <div class="stat-card">
+                <p>Success Rate</p>
+                <h2 id="successRate">--</h2>
+            </div>
+        </section>
+
+        <section id="validator" class="panel">
+            <h2>Project Validation</h2>
+            <p>Enter the absolute path of your project directory.</p>
+
+            <form id="validationForm">
+                <input type="text" id="projectPath" placeholder="C:\Users\YourName\Desktop\Project" required>
+                <button type="submit" id="validateButton">
+                    Validate Project
+                </button>
+            </form>
+
+            <div id="loading" hidden>Validating project...</div>
+            <div id="error" class="error" hidden></div>
+            <div id="result"></div>
+        </section>
+
+        <section id="history" class="panel">
+            <div class="section-heading">
+                <div>
+                    <h2>Validation History</h2>
+                    <p>Records retrieved from the backend database.</p>
+                </div>
+                <button id="refreshButton" type="button">Refresh</button>
+            </div>
+            <div id="historyList">Loading history...</div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
